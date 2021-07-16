@@ -16,6 +16,10 @@ public class Post {
 
     private LocalDateTime created;
 
+    public Post(String title, String link, String description, LocalDateTime created) {
+        this(0, title, link, description, created);
+    }
+
     public Post(int id, String title, String link, String description, LocalDateTime created) {
         this.id = id;
         this.title = title;
