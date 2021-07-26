@@ -27,24 +27,20 @@ public class SqlRuParse implements Parse {
     @Override
     public List<Post> list(String link) {
         List<Post> result = new ArrayList<>();
-        int limit = 1;
-        for (int page = 1; page <= limit; page++) {
-            String url = String.format("%s/%d", link, page);
-            Document doc;
-            try {
-                doc = Jsoup.connect(url).get();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-            Elements elements = doc.select(".postslisttopic");
-            List<Element> elemPosts = elements.stream()
-                    .filter(element -> !element.text().startsWith("Важно: ") && !element.text().contains("[закрыт]"))
-                    .collect(Collectors.toList());
-            for (Element elemPost : elemPosts) {
-                String postLink = elemPost.child(0).attr("href");
-                Post post = detail(postLink);
-                result.add(post);
-            }
+        Document doc;
+        try {
+            doc = Jsoup.connect(link).get();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        Elements elements = doc.select(".postslisttopic");
+        List<Element> elemPosts = elements.stream()
+                .filter(element -> !element.text().startsWith("Важно: ") && !element.text().contains("[закрыт]"))
+                .collect(Collectors.toList());
+        for (Element elemPost : elemPosts) {
+            String postLink = elemPost.child(0).attr("href");
+            Post post = detail(postLink);
+            result.add(post);
         }
         return result;
     }
@@ -72,7 +68,7 @@ public class SqlRuParse implements Parse {
     }
 
     public static void main(String[] args) {
-        String url = "https://www.sql.ru/forum/job-offers";
+        String url = "https://www.sql.ru/forum/job-offers/1";
         SqlRuParse sqlRuParse = new SqlRuParse(new SqlRuDateTimeParser());
         for (Post post : sqlRuParse.list(url)) {
             System.out.println(post);
