@@ -6,6 +6,10 @@ import ru.job4j.grabber.utils.SqlRuDateTimeParser;
 import ru.job4j.html.SqlRuParse;
 
 import java.io.*;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Properties;
 
@@ -15,6 +19,8 @@ import static org.quartz.TriggerBuilder.newTrigger;
 
 public class Grabber implements Grab {
     private final Properties cfg = new Properties();
+
+    private static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
 
     public Store store() {
         return new PsqlStore(cfg);
@@ -30,6 +36,61 @@ public class Grabber implements Grab {
         try (InputStream in = PsqlStore.class.getClassLoader().getResourceAsStream("grabber.properties")) {
             cfg.load(in);
         }
+    }
+
+    public void web(Store store) {
+        final String htmlDoc = "<html>"
+                       + "<head>"
+                            + "<meta charset=\"UTF-8\">"
+                            + "<title>Java Вакансии</title>"
+                       + "</head>"
+                       + "<body>"
+                            + "<h1>Java вакансии на %s</h1>"
+                            + "<hr align=\"center\" size=\"2\" color=\"#000000\" />"
+                            + "<br/>"
+                            + "%s"
+                       + "</body>"
+                       + "</html>";
+        final String htmlPost = "<a href=\"%s\"><h3>№%d %s</h3></a>"
+                        + "<p>ID: %d, Дата публикации: %s</p>"
+                        + "<p>%s</p>"
+                        + "<hr align=\"center\" size=\"1\" color=\"#000000\" />";
+        new Thread(() -> {
+            try (ServerSocket server = new ServerSocket(Integer.parseInt(cfg.getProperty("port")))) {
+                while (!server.isClosed()) {
+                    Socket socket = server.accept();
+                    try (OutputStream out = socket.getOutputStream()) {
+                        out.write("HTTP/1.1 200 OK\r\n\r\n".getBytes());
+                        StringBuilder sb = new StringBuilder();
+                        int count = 1;
+                        for (Post post : store.getAll()) {
+                            sb.append(
+                                    String.format(htmlPost,
+                                            post.getLink(),
+                                            count++,
+                                            post.getTitle(),
+                                            post.getId(),
+                                            post.getCreated().format(formatter),
+                                            post.getDescription()
+                                    )
+                            );
+                        }
+                        out.write(
+                                String.format(htmlDoc,
+                                        LocalDateTime.now().format(formatter),
+                                        sb.toString()
+                                ).getBytes()
+                        );
+                        out.write(System.lineSeparator().getBytes());
+
+                    } catch (IOException io) {
+                        io.printStackTrace();
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }).start();
     }
 
     @Override
@@ -76,5 +137,6 @@ public class Grabber implements Grab {
         Scheduler scheduler = grab.scheduler();
         Store store = grab.store();
         grab.init(new SqlRuParse(new SqlRuDateTimeParser()), store, scheduler);
+        grab.web(store);
     }
 }
