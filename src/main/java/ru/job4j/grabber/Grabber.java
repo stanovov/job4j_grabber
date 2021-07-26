@@ -10,8 +10,10 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 import static org.quartz.JobBuilder.newJob;
 import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
@@ -63,7 +65,10 @@ public class Grabber implements Grab {
                         out.write("HTTP/1.1 200 OK\r\n\r\n".getBytes());
                         StringBuilder sb = new StringBuilder();
                         int count = 1;
-                        for (Post post : store.getAll()) {
+                        List<Post> posts = store.getAll().stream()
+                                .sorted(Comparator.comparing(Post::getCreated).reversed())
+                                .collect(Collectors.toList());
+                        for (Post post : posts) {
                             sb.append(
                                     String.format(htmlPost,
                                             post.getLink(),
