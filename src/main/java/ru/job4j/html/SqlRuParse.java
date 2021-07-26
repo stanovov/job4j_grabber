@@ -14,6 +14,7 @@ import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class SqlRuParse implements Parse {
@@ -37,8 +38,10 @@ public class SqlRuParse implements Parse {
         List<Element> elemPosts = elements.stream()
                 .filter(element -> {
                     String title = element.text();
-                    return !title.startsWith("Важно: ") && !title.contains("[закрыт]")
-                            && title.toLowerCase().contains("java");
+                    if (title.startsWith("Важно: ") && title.contains("[закрыт]")) {
+                        return false;
+                    }
+                    return Pattern.compile("java[^s]?").matcher(title.toLowerCase()).find();
                 }).collect(Collectors.toList());
         for (Element elemPost : elemPosts) {
             String postLink = elemPost.child(0).attr("href");
