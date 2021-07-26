@@ -35,8 +35,11 @@ public class SqlRuParse implements Parse {
         }
         Elements elements = doc.select(".postslisttopic");
         List<Element> elemPosts = elements.stream()
-                .filter(element -> !element.text().startsWith("Важно: ") && !element.text().contains("[закрыт]"))
-                .collect(Collectors.toList());
+                .filter(element -> {
+                    String title = element.text();
+                    return !title.startsWith("Важно: ") && !title.contains("[закрыт]")
+                            && title.toLowerCase().contains("java");
+                }).collect(Collectors.toList());
         for (Element elemPost : elemPosts) {
             String postLink = elemPost.child(0).attr("href");
             Post post = detail(postLink);
