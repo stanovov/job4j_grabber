@@ -19,6 +19,8 @@ import java.util.stream.Collectors;
 
 public class SqlRuParse implements Parse {
 
+    private final static Pattern PATTERN = Pattern.compile("java[^s]?");
+
     private final DateTimeParser dateTimeParser;
 
     public SqlRuParse(DateTimeParser dateTimeParser) {
@@ -41,7 +43,7 @@ public class SqlRuParse implements Parse {
                     if (title.startsWith("Важно: ") && title.contains("[закрыт]")) {
                         return false;
                     }
-                    return Pattern.compile("java[^s]?").matcher(title.toLowerCase()).find();
+                    return PATTERN.matcher(title.toLowerCase()).find();
                 }).collect(Collectors.toList());
         for (Element elemPost : elemPosts) {
             String postLink = elemPost.child(0).attr("href");
