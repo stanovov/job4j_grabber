@@ -1,10 +1,16 @@
 [![Build Status](https://travis-ci.com/stanovov/job4j_grabber.svg?branch=master)](https://travis-ci.com/stanovov/job4j_grabber)
 
+![](https://img.shields.io/badge/Maven-=_3-red)
+![](https://img.shields.io/badge/Java-=_14-orange)
+![](https://img.shields.io/badge/JDBC-738bff)
+![](https://img.shields.io/badge/PostgerSQL-=_9-blue)
+![](https://img.shields.io/badge/Checkstyle-lightgrey)
+
 # job4j_grabber
 
 + [О проекте](#0-проекте)
 + [Технологии](#Технологии)
-+ [Запуск и сборка](#Сборка-и-запуск)
++ [Сборка и запуск](#Сборка-и-запуск)
 + [Использование](#Использование)
 + [Контакты](#Контакты)
 
@@ -14,10 +20,10 @@
 вакансии с сайта [sql.ru](sql.ru) относящиеся к Java и записывает их в базу. Отображает вакансии
 в порядке убывания по дате создания.
 
-## Технологии
+## Технологии 
 
 + Сборщик проектов **Maven**;
-+ Backend - **Java 14**;
++ Backend - **Java 14**, **jsoup**;
 + Логгирование - **Log4j**, **Slf4j**;
 + СУБД - **PostgreSQL**;
 + Непрерывная интеграция - **Travis CI**;
